@@ -104,6 +104,9 @@ class HandoffStore:
     def timestamp(self) -> str:
         return self._timestamp()
 
+    def canonical_layout_fingerprint(self) -> str:
+        return self._layout_fingerprint()
+
     def _write_json(self, relative: str, payload: dict) -> None:
         path = self.base / relative
         path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")

@@ -205,6 +205,31 @@ class CLIE2ETest(unittest.TestCase):
             self.assertIn("Import OMX plan task", restore)
             self.assertIn("Merged OMX decision", restore)
 
+    def test_checkpoint_repairs_manifest_integrity_from_minimal_seed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._seed_canonical_state(root)
+            self._write_json(
+                root / ".handoff" / "manifest.json",
+                {
+                    "schema_version": "1",
+                    "active_adapter": "raw",
+                    "created_at": "2026-04-09T00:00:00Z",
+                    "updated_at": "2026-04-09T00:00:00Z",
+                    "last_checkpoint_at": None,
+                    "last_resume_at": None,
+                    "integrity": {},
+                },
+            )
+
+            result = self._run_cli("checkpoint", root=root)
+
+            self.assertEqual(result.returncode, 0)
+
+            manifest = json.loads((root / ".handoff" / "manifest.json").read_text())
+            self.assertEqual(manifest["integrity"]["algorithm"], "sha256")
+            self.assertEqual(len(manifest["integrity"]["canonical_layout_fingerprint"]), 64)
+
     def test_resume_prints_restore_contents(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

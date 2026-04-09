@@ -79,16 +79,7 @@ def _refresh_portable_state(store: HandoffStore, root: Path, *, action: str) -> 
     manifest["active_adapter"] = active_adapter
     manifest["created_at"] = manifest.get("created_at", timestamp)
     manifest["updated_at"] = timestamp
-    manifest["integrity"] = manifest.get(
-        "integrity",
-        {
-            "algorithm": "sha256",
-            "canonical_layout_fingerprint": store.read_json("manifest.json", {}).get(
-                "integrity",
-                {},
-            ).get("canonical_layout_fingerprint", ""),
-        },
-    )
+    manifest["integrity"] = _normalize_integrity(manifest.get("integrity"), store)
     if action == "checkpoint":
         manifest["last_checkpoint_at"] = timestamp
     if action == "resume":
@@ -135,6 +126,15 @@ def _memory_values(project_memory: dict[str, object]) -> list[str]:
         if isinstance(value, str) and value:
             values.append(value)
     return _dedupe(values)
+
+
+def _normalize_integrity(
+    integrity: object, store: HandoffStore
+) -> dict[str, str]:
+    normalized = integrity if isinstance(integrity, dict) else {}
+    normalized["algorithm"] = "sha256"
+    normalized["canonical_layout_fingerprint"] = store.canonical_layout_fingerprint()
+    return normalized
 
 
 def _dedupe(items: list[str]) -> list[str]:
