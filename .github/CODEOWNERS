@@ -1,0 +1,9 @@
+# Global owners — assigned to all PRs by default
+# Replace with your team's GitHub usernames or team handles
+
+* @your-org/your-team
+
+# Specific path overrides
+# /.github/          @your-org/devops
+# /docs/             @your-org/docs-team
+# /src/ml/           @your-org/ml-team
