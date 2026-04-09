@@ -32,6 +32,11 @@ ENV/
 env.bak/
 venv.bak/
 .python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # ── ML / Data ────────────────────────────────────────────
 *.h5
@@ -107,3 +112,8 @@ Thumbs.db
 *.tfstate.*
 .terraformrc
 terraform.rc
+.omx/
+
+# ── Local agent / handoff helpers ────────────────────────
+.codex
+.claude/
