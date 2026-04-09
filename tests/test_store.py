@@ -29,6 +29,7 @@ class StoreInitTest(unittest.TestCase):
             expected_files = (
                 "manifest.json",
                 "restore.md",
+                "llm-handoff.md",
                 "session/current.json",
                 "session/recent-summary.md",
                 "session/conversation-tail.md",
@@ -86,6 +87,15 @@ class StoreInitTest(unittest.TestCase):
             self.assertEqual(session["last_adapter_used"], "raw")
 
             self.assertEqual((base / "memory" / "memory-merge-log.jsonl").read_text(), "")
+
+
+class StoreExportLayoutTest(unittest.TestCase):
+    def test_ensure_layout_creates_llm_handoff_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            store = HandoffStore(root)
+            store.ensure_layout()
+            self.assertTrue((root / ".handoff" / "llm-handoff.md").exists())
 
 
 if __name__ == "__main__":

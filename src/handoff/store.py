@@ -34,6 +34,7 @@ class HandoffStore:
 
     CANONICAL_TEXT_FILES = (
         "restore.md",
+        "llm-handoff.md",
         "session/recent-summary.md",
         "session/conversation-tail.md",
         "session/next-action.md",
