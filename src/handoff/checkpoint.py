@@ -2,6 +2,7 @@ from pathlib import Path
 
 from handoff.adapters.omx import OMXAdapter
 from handoff.adapters.raw import RawAdapter
+from handoff.capture import capture_session_state
 from handoff.compiler import compile_restore
 from handoff.constraints import extract_constraints
 from handoff.memory import merge_project_memory
@@ -17,6 +18,47 @@ def run_resume(root: Path) -> str:
     store = HandoffStore(root)
     _refresh_portable_state(store, root, action="resume")
     return store.read_restore()
+
+
+def run_to_claude(root: Path, *, input_fn=input) -> str:
+    store = HandoffStore(root)
+    _refresh_portable_state(store, root, action="resume")
+    current = store.read_json("session/current.json", {})
+    memory = store.read_json("memory/project-memory.json", {"entries": []})
+
+    rich_enough = bool(
+        (current.get("goal") or current.get("captured_summary"))
+        and current.get("next_action")
+        and (
+            current.get("captured_open_tasks")
+            or current.get("captured_key_decisions")
+            or memory.get("entries")
+        )
+    )
+
+    if not rich_enough:
+        summary = input_fn("Summary: ").strip()
+        next_action = input_fn("Next action: ").strip()
+        open_tasks = input_fn("Open tasks (comma-separated, optional): ").strip()
+        key_decisions = input_fn("Key decisions (comma-separated, optional): ").strip()
+        capture_session_state(
+            root=root,
+            source="interactive-cli",
+            summary=summary,
+            next_action=next_action,
+            open_tasks=[item.strip() for item in open_tasks.split(",") if item.strip()],
+            key_decisions=[
+                item.strip() for item in key_decisions.split(",") if item.strip()
+            ],
+        )
+        _refresh_portable_state(store, root, action="resume")
+
+    return (
+        "Read .handoff/restore.md first.\n"
+        "Then use .handoff/ as the source of truth for the current goal, status, tasks, memory, and next action.\n"
+        "Refresh only the files you actually need after reading the restore brief.\n"
+        "Continue from the recorded next action instead of rediscovering context.\n"
+    )
 
 
 def _refresh_portable_state(store: HandoffStore, root: Path, *, action: str) -> None:
