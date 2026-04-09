@@ -446,6 +446,28 @@ class ToClaudeCommandTest(unittest.TestCase):
 
             self.assertEqual(alias_text, export_text)
 
+
+class CaptureToExportIntegrationTest(unittest.TestCase):
+    def test_capture_then_export_uses_captured_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Captured from live session",
+                next_action="Continue elsewhere",
+                open_tasks=["Task 1"],
+                key_decisions=["Decision 1"],
+            )
+
+            export_text = run_export(root, input_fn=lambda _: self.fail("unexpected prompt"))
+
+            self.assertIn("# LLM Handoff", export_text)
+            self.assertIn("Captured from live session", export_text)
+            self.assertIn("Continue elsewhere", export_text)
+            self.assertIn("Task 1", export_text)
+            self.assertIn("Decision 1", export_text)
+
     def test_capture_then_to_claude_uses_captured_context(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

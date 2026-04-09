@@ -96,3 +96,4 @@ class CaptureWriteTest(unittest.TestCase):
             note = (root / ".handoff" / "session" / "live-capture.md").read_text()
             self.assertIn("# Live Capture", note)
             self.assertIn("## Summary", note)
+            self.assertIn("Captured from codex-skill", note)
