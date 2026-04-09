@@ -320,6 +320,95 @@ class ToClaudeCommandTest(unittest.TestCase):
             )
             self.assertEqual(current["captured_summary"], "Captured summary")
 
+    def test_to_claude_uses_canonical_task_state_without_prompting(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            handoff = root / ".handoff"
+            (handoff / "session").mkdir(parents=True, exist_ok=True)
+            (handoff / "tasks").mkdir(parents=True, exist_ok=True)
+            (handoff / "plans").mkdir(parents=True, exist_ok=True)
+            (handoff / "memory").mkdir(parents=True, exist_ok=True)
+            (handoff / "context").mkdir(parents=True, exist_ok=True)
+            (handoff / "verification").mkdir(parents=True, exist_ok=True)
+
+            (handoff / "session" / "current.json").write_text(
+                json.dumps(
+                    {
+                        "goal": "Goal from canonical state",
+                        "status": "working",
+                        "next_action": "Use canonical task context",
+                        "active_mode": None,
+                        "timestamp": "2026-04-09T00:00:00Z",
+                        "last_checkpoint_at": None,
+                        "last_adapter_used": "raw",
+                        "captured_summary": "",
+                        "captured_open_tasks": [],
+                        "captured_key_decisions": [],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            (handoff / "tasks" / "tasks.json").write_text(
+                json.dumps({"tasks": ["Canonical task only"]}, indent=2, sort_keys=True)
+                + "\n"
+            )
+
+            prompt = run_to_claude(
+                root, input_fn=lambda _: self.fail("unexpected prompt")
+            )
+
+            self.assertIn("Read .handoff/restore.md first.", prompt)
+            restore = (handoff / "restore.md").read_text()
+            self.assertIn("Canonical task only", restore)
+
+    def test_to_claude_reprompts_for_blank_summary_and_next_action(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            prompts = iter(
+                [
+                    "",
+                    "Captured summary",
+                    "",
+                    "Captured next action",
+                    "",
+                    "",
+                ]
+            )
+
+            prompt = run_to_claude(root, input_fn=lambda _: next(prompts))
+
+            self.assertIn("Read .handoff/restore.md first.", prompt)
+            current = json.loads(
+                (root / ".handoff" / "session" / "current.json").read_text()
+            )
+            self.assertEqual(current["captured_summary"], "Captured summary")
+            self.assertEqual(current["next_action"], "Captured next action")
+
+    def test_capture_then_to_claude_uses_captured_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Captured from live Codex session",
+                next_action="Continue in Claude",
+                open_tasks=["Task 1"],
+                key_decisions=["Decision 1"],
+            )
+
+            prompt = run_to_claude(
+                root, input_fn=lambda _: self.fail("prompted unexpectedly")
+            )
+            restore = (root / ".handoff" / "restore.md").read_text()
+
+            self.assertIn("Captured from live Codex session", restore)
+            self.assertIn("Continue in Claude", restore)
+            self.assertIn("Task 1", restore)
+            self.assertIn("Decision 1", restore)
+            self.assertIn("Read .handoff/restore.md first.", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

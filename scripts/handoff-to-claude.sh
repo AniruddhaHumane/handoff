@@ -2,7 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TARGET_ROOT="${1:-$(pwd)}"
+TARGET_INPUT="${1:-$(pwd)}"
+TARGET_ROOT="$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$TARGET_INPUT")"
 
 cd "$ROOT_DIR"
 

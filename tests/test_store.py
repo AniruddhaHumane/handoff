@@ -34,6 +34,7 @@ class StoreInitTest(unittest.TestCase):
                 "session/conversation-tail.md",
                 "session/next-action.md",
                 "session/status.md",
+                "session/capture-history.jsonl",
                 "tasks/tasks.json",
                 "plans/active-plan.md",
                 "plans/plan-index.json",

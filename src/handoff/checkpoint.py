@@ -25,6 +25,7 @@ def run_to_claude(root: Path, *, input_fn=input) -> str:
     _refresh_portable_state(store, root, action="resume")
     current = store.read_json("session/current.json", {})
     memory = store.read_json("memory/project-memory.json", {"entries": []})
+    tasks = store.read_json("tasks/tasks.json", {"tasks": []})
 
     rich_enough = bool(
         (current.get("goal") or current.get("captured_summary"))
@@ -32,13 +33,14 @@ def run_to_claude(root: Path, *, input_fn=input) -> str:
         and (
             current.get("captured_open_tasks")
             or current.get("captured_key_decisions")
+            or tasks.get("tasks")
             or memory.get("entries")
         )
     )
 
     if not rich_enough:
-        summary = input_fn("Summary: ").strip()
-        next_action = input_fn("Next action: ").strip()
+        summary = _require_non_empty(input_fn, "Summary: ")
+        next_action = _require_non_empty(input_fn, "Next action: ")
         open_tasks = input_fn("Open tasks (comma-separated, optional): ").strip()
         key_decisions = input_fn("Key decisions (comma-separated, optional): ").strip()
         capture_session_state(
@@ -59,6 +61,13 @@ def run_to_claude(root: Path, *, input_fn=input) -> str:
         "Refresh only the files you actually need after reading the restore brief.\n"
         "Continue from the recorded next action instead of rediscovering context.\n"
     )
+
+
+def _require_non_empty(input_fn, prompt: str) -> str:
+    while True:
+        value = input_fn(prompt).strip()
+        if value:
+            return value
 
 
 def _refresh_portable_state(store: HandoffStore, root: Path, *, action: str) -> None:
