@@ -118,10 +118,21 @@ class HandoffStore:
         path.write_text(restore)
         return path
 
+    def write_llm_handoff(self, content: str) -> Path:
+        path = self.base / "llm-handoff.md"
+        path.write_text(content)
+        return path
+
     def read_restore(self) -> str:
         path = self.base / "restore.md"
         if not path.exists():
             raise FileNotFoundError("restore.md not found")
+        return path.read_text()
+
+    def read_llm_handoff(self) -> str:
+        path = self.base / "llm-handoff.md"
+        if not path.exists():
+            raise FileNotFoundError("llm-handoff.md not found")
         return path.read_text()
 
     def _layout_fingerprint(self) -> str:

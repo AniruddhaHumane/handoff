@@ -60,3 +60,40 @@ def compile_restore(
     )
 
     return dedent("\n".join(sections) + "\n")
+
+
+def compile_llm_handoff(
+    *,
+    summary: str,
+    next_action: str,
+    tasks: list[str],
+    decisions: list[str],
+    constraints: list[str],
+) -> str:
+    task_lines = "\n".join(f"- {item}" for item in tasks) or "- None"
+    decision_lines = "\n".join(f"- {item}" for item in decisions) or "- None"
+    constraint_lines = "\n".join(f"- {item}" for item in constraints) or "- None"
+
+    sections = [
+        "# LLM Handoff",
+        "",
+        "## Summary",
+        summary,
+        "",
+        "## Next Action",
+        next_action,
+        "",
+        "## Open Tasks",
+        task_lines,
+        "",
+        "## Key Decisions",
+        decision_lines,
+        "",
+        "## Constraints",
+        constraint_lines,
+        "",
+        "## Notes",
+        "- Use `.handoff/` as canonical state.",
+        "- Hidden model state is not portable.",
+    ]
+    return dedent("\n".join(sections) + "\n")

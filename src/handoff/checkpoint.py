@@ -3,7 +3,7 @@ from pathlib import Path
 from handoff.adapters.omx import OMXAdapter
 from handoff.adapters.raw import RawAdapter
 from handoff.capture import capture_session_state
-from handoff.compiler import compile_restore
+from handoff.compiler import compile_llm_handoff, compile_restore
 from handoff.constraints import extract_constraints
 from handoff.memory import merge_project_memory
 from handoff.store import HandoffStore
@@ -18,6 +18,12 @@ def run_resume(root: Path) -> str:
     store = HandoffStore(root)
     _refresh_portable_state(store, root, action="resume")
     return store.read_restore()
+
+
+def run_export(root: Path) -> str:
+    store = HandoffStore(root)
+    _refresh_portable_state(store, root, action="export")
+    return store.read_llm_handoff()
 
 
 def run_to_claude(root: Path, *, input_fn=input) -> str:
@@ -159,6 +165,22 @@ def _refresh_portable_state(store: HandoffStore, root: Path, *, action: str) -> 
         captured_summary=current_session.get("captured_summary", ""),
     )
     store.write_restore(restore)
+    llm_handoff = compile_llm_handoff(
+        summary=current_session.get("captured_summary", "")
+        or current_session.get("goal", ""),
+        next_action=current_session.get("next_action") or "Resume from restore.md",
+        tasks=_dedupe(
+            current_session.get("captured_open_tasks", [])
+            + task_payload.get("tasks", [])
+            + imported_tasks
+        ),
+        decisions=_dedupe(
+            current_session.get("captured_key_decisions", [])
+            + _memory_values(merged_memory)
+        ),
+        constraints=constraints["rules"],
+    )
+    store.write_llm_handoff(llm_handoff)
 
 
 def _capture_available_sources(root: Path) -> list[dict[str, object]]:

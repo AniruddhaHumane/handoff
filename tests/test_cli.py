@@ -10,7 +10,7 @@ from pathlib import Path
 
 from handoff.capture import capture_session_state
 from handoff.cli import main
-from handoff.checkpoint import run_checkpoint, run_to_claude
+from handoff.checkpoint import run_checkpoint, run_export, run_to_claude
 
 
 class CLISmokeTest(unittest.TestCase):
@@ -286,6 +286,27 @@ class RestorePriorityTest(unittest.TestCase):
             self.assertIn("Captured next action", restore)
             self.assertIn("Captured task", restore)
             self.assertIn("Captured decision", restore)
+
+
+class GenericExportRenderTest(unittest.TestCase):
+    def test_export_writes_generic_llm_handoff_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Generic summary",
+                next_action="Generic next action",
+                open_tasks=["Task A"],
+                key_decisions=["Decision A"],
+            )
+
+            run_export(root)
+            export_text = (root / ".handoff" / "llm-handoff.md").read_text()
+
+            self.assertIn("# LLM Handoff", export_text)
+            self.assertIn("## Summary", export_text)
+            self.assertIn("## Constraints", export_text)
 
 
 class ToClaudeCommandTest(unittest.TestCase):
