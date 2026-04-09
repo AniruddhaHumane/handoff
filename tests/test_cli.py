@@ -322,9 +322,13 @@ class ExportCommandTest(unittest.TestCase):
                 key_decisions=["Decision A"],
             )
 
-            output = main(["export", "--root", str(root)])
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                output = main(["export", "--root", str(root)])
 
             self.assertEqual(output, 0)
+            self.assertIn("# LLM Handoff", stdout.getvalue())
+            self.assertIn("## Summary", stdout.getvalue())
 
 
 class ToClaudeCommandTest(unittest.TestCase):
@@ -342,7 +346,7 @@ class ToClaudeCommandTest(unittest.TestCase):
 
             prompt = run_to_claude(root, input_fn=lambda _: self.fail("unexpected prompt"))
 
-            self.assertIn("Read .handoff/restore.md first.", prompt)
+            self.assertIn("# LLM Handoff", prompt)
 
     def test_to_claude_prompts_when_state_is_too_sparse(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -353,7 +357,7 @@ class ToClaudeCommandTest(unittest.TestCase):
 
             prompt = run_to_claude(root, input_fn=lambda _: next(prompts))
 
-            self.assertIn("Read .handoff/restore.md first.", prompt)
+            self.assertIn("# LLM Handoff", prompt)
             current = json.loads(
                 (root / ".handoff" / "session" / "current.json").read_text()
             )
@@ -398,7 +402,7 @@ class ToClaudeCommandTest(unittest.TestCase):
                 root, input_fn=lambda _: self.fail("unexpected prompt")
             )
 
-            self.assertIn("Read .handoff/restore.md first.", prompt)
+            self.assertIn("# LLM Handoff", prompt)
             restore = (handoff / "restore.md").read_text()
             self.assertIn("Canonical task only", restore)
 
@@ -418,12 +422,29 @@ class ToClaudeCommandTest(unittest.TestCase):
 
             prompt = run_to_claude(root, input_fn=lambda _: next(prompts))
 
-            self.assertIn("Read .handoff/restore.md first.", prompt)
+            self.assertIn("# LLM Handoff", prompt)
             current = json.loads(
                 (root / ".handoff" / "session" / "current.json").read_text()
             )
             self.assertEqual(current["captured_summary"], "Captured summary")
             self.assertEqual(current["next_action"], "Captured next action")
+
+    def test_to_claude_alias_matches_export_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Alias summary",
+                next_action="Alias next action",
+                open_tasks=["Alias task"],
+                key_decisions=["Alias decision"],
+            )
+
+            export_text = run_export(root, input_fn=lambda _: self.fail("unexpected prompt"))
+            alias_text = run_to_claude(root, input_fn=lambda _: self.fail("unexpected prompt"))
+
+            self.assertEqual(alias_text, export_text)
 
     def test_capture_then_to_claude_uses_captured_context(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -446,7 +467,7 @@ class ToClaudeCommandTest(unittest.TestCase):
             self.assertIn("Continue in Claude", restore)
             self.assertIn("Task 1", restore)
             self.assertIn("Decision 1", restore)
-            self.assertIn("Read .handoff/restore.md first.", prompt)
+            self.assertIn("# LLM Handoff", prompt)
 
 
 if __name__ == "__main__":

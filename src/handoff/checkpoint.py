@@ -20,15 +20,9 @@ def run_resume(root: Path) -> str:
     return store.read_restore()
 
 
-def run_export(root: Path) -> str:
+def run_export(root: Path, *, input_fn=input) -> str:
     store = HandoffStore(root)
     _refresh_portable_state(store, root, action="export")
-    return store.read_llm_handoff()
-
-
-def run_to_claude(root: Path, *, input_fn=input) -> str:
-    store = HandoffStore(root)
-    _refresh_portable_state(store, root, action="resume")
     current = store.read_json("session/current.json", {})
     memory = store.read_json("memory/project-memory.json", {"entries": []})
     tasks = store.read_json("tasks/tasks.json", {"tasks": []})
@@ -59,14 +53,13 @@ def run_to_claude(root: Path, *, input_fn=input) -> str:
                 item.strip() for item in key_decisions.split(",") if item.strip()
             ],
         )
-        _refresh_portable_state(store, root, action="resume")
+        _refresh_portable_state(store, root, action="export")
 
-    return (
-        "Read .handoff/restore.md first.\n"
-        "Then use .handoff/ as the source of truth for the current goal, status, tasks, memory, and next action.\n"
-        "Refresh only the files you actually need after reading the restore brief.\n"
-        "Continue from the recorded next action instead of rediscovering context.\n"
-    )
+    return store.read_llm_handoff()
+
+
+def run_to_claude(root: Path, *, input_fn=input) -> str:
+    return run_export(root, input_fn=input_fn)
 
 
 def _require_non_empty(input_fn, prompt: str) -> str:
