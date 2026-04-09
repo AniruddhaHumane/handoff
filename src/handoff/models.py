@@ -25,6 +25,9 @@ class SessionState:
     timestamp: str = ""
     last_checkpoint_at: str | None = None
     last_adapter_used: str = "raw"
+    captured_summary: str = ""
+    captured_open_tasks: list[str] = field(default_factory=list)
+    captured_key_decisions: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -38,6 +38,7 @@ class HandoffStore:
         "session/conversation-tail.md",
         "session/next-action.md",
         "session/status.md",
+        "session/capture-history.jsonl",
         "plans/active-plan.md",
         "verification/verification.md",
         "memory/memory-merge-log.jsonl",
