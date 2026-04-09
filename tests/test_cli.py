@@ -309,6 +309,24 @@ class GenericExportRenderTest(unittest.TestCase):
             self.assertIn("## Constraints", export_text)
 
 
+class ExportCommandTest(unittest.TestCase):
+    def test_export_command_prints_generic_handoff(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Summary",
+                next_action="Next action",
+                open_tasks=["Task A"],
+                key_decisions=["Decision A"],
+            )
+
+            output = main(["export", "--root", str(root)])
+
+            self.assertEqual(output, 0)
+
+
 class ToClaudeCommandTest(unittest.TestCase):
     def test_to_claude_prints_paste_ready_prompt_when_state_is_rich_enough(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

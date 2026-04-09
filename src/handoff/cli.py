@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from handoff.checkpoint import run_checkpoint, run_resume, run_to_claude
+from handoff.checkpoint import run_checkpoint, run_export, run_resume, run_to_claude
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -13,6 +13,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     resume = subparsers.add_parser("resume")
     resume.add_argument("--root", type=Path, default=Path.cwd())
+
+    export = subparsers.add_parser("export")
+    export.add_argument("--root", type=Path, default=Path.cwd())
 
     to_claude = subparsers.add_parser("to-claude")
     to_claude.add_argument("--root", type=Path, default=Path.cwd())
@@ -30,8 +33,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "resume":
         print(run_resume(args.root))
         return 0
+    if args.command == "export":
+        print(run_export(args.root), end="")
+        return 0
     if args.command == "to-claude":
-        print(run_to_claude(args.root), end="")
+        print(run_export(args.root), end="")
         return 0
     return 1
 
