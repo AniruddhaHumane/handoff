@@ -10,11 +10,20 @@ def compile_restore(
     tasks: list[str],
     decisions: list[str],
     verification: list[str],
+    captured_summary: str = "",
 ) -> str:
     constraint_lines = "\n".join(f"- {item}" for item in constraints) or "- None"
     task_lines = "\n".join(f"- {item}" for item in tasks) or "- None"
     decision_lines = "\n".join(f"- {item}" for item in decisions) or "- None"
     verification_lines = "\n".join(f"- {item}" for item in verification) or "- None"
+    summary_block = (
+        f"""
+## Captured Summary
+{captured_summary}
+"""
+        if captured_summary
+        else ""
+    )
 
     return dedent(
         f"""\
@@ -25,6 +34,7 @@ def compile_restore(
 
         ## Status
         {status}
+{summary_block}
 
         ## Constraints
         {constraint_lines}

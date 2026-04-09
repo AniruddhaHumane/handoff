@@ -8,7 +8,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from handoff.capture import capture_session_state
 from handoff.cli import main
+from handoff.checkpoint import run_checkpoint
 
 
 class CLISmokeTest(unittest.TestCase):
@@ -261,6 +263,28 @@ class CLIE2ETest(unittest.TestCase):
 
             restore = (root / ".handoff" / "restore.md").read_text()
             self.assertEqual(result.stdout, restore + "\n")
+
+
+class RestorePriorityTest(unittest.TestCase):
+    def test_checkpoint_prefers_captured_state_in_restore(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Captured summary",
+                next_action="Captured next action",
+                open_tasks=["Captured task"],
+                key_decisions=["Captured decision"],
+            )
+
+            run_checkpoint(root)
+            restore = (root / ".handoff" / "restore.md").read_text()
+
+            self.assertIn("Captured summary", restore)
+            self.assertIn("Captured next action", restore)
+            self.assertIn("Captured task", restore)
+            self.assertIn("Captured decision", restore)
 
 
 if __name__ == "__main__":

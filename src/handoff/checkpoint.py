@@ -90,13 +90,22 @@ def _refresh_portable_state(store: HandoffStore, root: Path, *, action: str) -> 
 
     task_payload = store.read_json("tasks/tasks.json", {"tasks": []})
     restore = compile_restore(
-        goal=current_session.get("goal", ""),
+        goal=current_session.get("goal", "")
+        or current_session.get("captured_summary", ""),
         status=current_session.get("status") or f"{action} created",
         next_action=current_session.get("next_action") or "Resume from restore.md",
         constraints=constraints["rules"],
-        tasks=_dedupe(task_payload.get("tasks", []) + imported_tasks),
-        decisions=_memory_values(merged_memory),
+        tasks=_dedupe(
+            current_session.get("captured_open_tasks", [])
+            + task_payload.get("tasks", [])
+            + imported_tasks
+        ),
+        decisions=_dedupe(
+            current_session.get("captured_key_decisions", [])
+            + _memory_values(merged_memory)
+        ),
         verification=verification,
+        captured_summary=current_session.get("captured_summary", ""),
     )
     store.write_restore(restore)
 
