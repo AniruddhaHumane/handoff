@@ -81,3 +81,18 @@ class CaptureWriteTest(unittest.TestCase):
                 root / ".handoff" / "session" / "capture-history.jsonl"
             ).read_text().strip().splitlines()
             self.assertEqual(len(lines), 2)
+
+    def test_capture_writes_live_capture_note(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture_session_state(
+                root=root,
+                source="codex-skill",
+                summary="Summary",
+                next_action="Next action",
+                open_tasks=["Task A"],
+                key_decisions=["Decision A"],
+            )
+            note = (root / ".handoff" / "session" / "live-capture.md").read_text()
+            self.assertIn("# Live Capture", note)
+            self.assertIn("## Summary", note)

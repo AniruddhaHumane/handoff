@@ -7,7 +7,7 @@ Portable handoff state for cross-agent resume.
 ```bash
 PYTHONPATH=src python -m handoff.cli checkpoint --root /path/to/repo
 PYTHONPATH=src python -m handoff.cli resume --root /path/to/repo
-PYTHONPATH=src python -m handoff.cli to-claude --root /path/to/repo
+PYTHONPATH=src python -m handoff.cli export --root /path/to/repo
 ```
 
 ## Self Test
@@ -17,18 +17,20 @@ chmod +x scripts/self-test.sh
 ./scripts/self-test.sh
 ```
 
-## Codex To Claude Code Workflow
+## Generic Handoff Workflow
 
 Preferred path:
 
-1. While still in Codex, use the live capture skill if you want the highest-fidelity handoff.
+1. While still in the source model session, use the `$handoff` live capture skill when available.
 2. Then run:
 
 ```bash
-PYTHONPATH=src python -m handoff.cli to-claude --root /path/to/repo
+PYTHONPATH=src python -m handoff.cli export --root /path/to/repo
 ```
 
-If the current `.handoff` state is already rich enough, the command prints the Claude Code prompt immediately.
+This writes `.handoff/llm-handoff.md` and prints the same structured handoff block to stdout.
+
+If the current `.handoff` state is already rich enough, export prints immediately.
 
 If the state is too sparse, it interactively prompts for:
 
@@ -37,30 +39,26 @@ If the state is too sparse, it interactively prompts for:
 - optional open tasks
 - optional key decisions
 
-and saves that data into `.handoff/session/current.json` before regenerating `restore.md`.
+and saves that data into `.handoff/session/current.json` before regenerating the export.
 
 Current guarantees:
 
 - `portable-handoff` persists durable context into `.handoff/`
 - it can optionally import `.omx/` state during refresh
-- it can generate a paste-ready Claude prompt
-- it does **not** automatically inject context into Claude Code
+- it can generate a generic structured LLM-readable handoff block
+- it does **not** automatically inject context into another model runtime
 - it does **not** transfer hidden model state, only externalized project state
 
-## Convenience Wrapper
+## Compatibility Wrapper
 
-To refresh the handoff bundle for a target repository and print the exact prompt to paste into Claude Code:
+The existing wrapper is still available for compatibility while the product surface migrates:
 
 ```bash
 chmod +x scripts/handoff-to-claude.sh
 ./scripts/handoff-to-claude.sh /path/to/repo
 ```
 
-If you run it from inside the target repository, you can omit the path:
-
-```bash
-/path/to/portable-handoff/scripts/handoff-to-claude.sh
-```
+It now delegates to the same generic export path.
 
 ## Behavior
 

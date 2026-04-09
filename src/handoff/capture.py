@@ -24,6 +24,18 @@ def capture_session_state(
     current["timestamp"] = timestamp
     store.write_json("session/current.json", current)
 
+    task_lines = "\n".join(f"- {item}" for item in open_tasks) or "- None"
+    decision_lines = "\n".join(f"- {item}" for item in key_decisions) or "- None"
+    note = (
+        "# Live Capture\n\n"
+        f"## Summary\n{summary}\n\n"
+        f"## Next Action\n{next_action}\n\n"
+        f"## Open Tasks\n{task_lines}\n\n"
+        f"## Key Decisions\n{decision_lines}\n\n"
+        f"## Source\nCaptured from live session at {timestamp}\n"
+    )
+    (store.base / "session" / "live-capture.md").write_text(note)
+
     store.append_jsonl(
         "session/capture-history.jsonl",
         [
