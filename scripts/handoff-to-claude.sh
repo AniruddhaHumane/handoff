@@ -7,6 +7,6 @@ TARGET_ROOT="$(python -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$
 
 cd "$ROOT_DIR"
 
-printf 'Portable handoff refreshed for:\n  %s\n\n' "$TARGET_ROOT"
-printf 'Paste this into Claude Code:\n\n'
-PYTHONPATH=src python -m handoff.cli to-claude --root "$TARGET_ROOT"
+printf 'Structured handoff exported for:\n  %s\n\n' "$TARGET_ROOT"
+printf 'Use this handoff block as context in the destination model.\n\n'
+PYTHONPATH=src python -m handoff.cli export --root "$TARGET_ROOT"
