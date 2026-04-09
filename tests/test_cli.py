@@ -281,6 +281,7 @@ class RestorePriorityTest(unittest.TestCase):
             run_checkpoint(root)
             restore = (root / ".handoff" / "restore.md").read_text()
 
+            self.assertTrue(restore.startswith("# Restore Brief\n"))
             self.assertIn("Captured summary", restore)
             self.assertIn("Captured next action", restore)
             self.assertIn("Captured task", restore)

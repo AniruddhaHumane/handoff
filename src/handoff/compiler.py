@@ -16,43 +16,47 @@ def compile_restore(
     task_lines = "\n".join(f"- {item}" for item in tasks) or "- None"
     decision_lines = "\n".join(f"- {item}" for item in decisions) or "- None"
     verification_lines = "\n".join(f"- {item}" for item in verification) or "- None"
-    summary_block = (
-        f"""
-## Captured Summary
-{captured_summary}
-"""
-        if captured_summary
-        else ""
+    sections = [
+        "# Restore Brief",
+        "",
+        "## Goal",
+        goal,
+        "",
+        "## Status",
+        status,
+    ]
+
+    if captured_summary:
+        sections.extend(
+            [
+                "",
+                "## Captured Summary",
+                captured_summary,
+            ]
+        )
+
+    sections.extend(
+        [
+            "",
+            "## Constraints",
+            constraint_lines,
+            "",
+            "## Open Tasks",
+            task_lines,
+            "",
+            "## Important Decisions",
+            decision_lines,
+            "",
+            "## Verification",
+            verification_lines,
+            "",
+            "## Exact Next Action",
+            next_action,
+            "",
+            "## Portability Boundary",
+            "- Durable state is portable through `.handoff/`.",
+            "- Hidden model state and opaque runtime state are not portable.",
+        ]
     )
 
-    return dedent(
-        f"""\
-        # Restore Brief
-
-        ## Goal
-        {goal}
-
-        ## Status
-        {status}
-{summary_block}
-
-        ## Constraints
-        {constraint_lines}
-
-        ## Open Tasks
-        {task_lines}
-
-        ## Important Decisions
-        {decision_lines}
-
-        ## Verification
-        {verification_lines}
-
-        ## Exact Next Action
-        {next_action}
-
-        ## Portability Boundary
-        - Durable state is portable through `.handoff/`.
-        - Hidden model state and opaque runtime state are not portable.
-        """
-    )
+    return dedent("\n".join(sections) + "\n")
