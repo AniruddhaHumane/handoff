@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {
+      "key": "architecture:handoff",
+      "value": ".handoff is canonical",
+      "sources": [
+        "omx"
+      ],
+      "updated_at": "2026-04-09T00:00:00Z"
+    }
+  ]
+}
