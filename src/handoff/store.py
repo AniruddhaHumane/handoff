@@ -53,9 +53,8 @@ class HandoffStore:
         for relative in self.CANONICAL_DIRECTORIES:
             (self.base / relative).mkdir(parents=True, exist_ok=True)
 
-        self._write_json(
-            "manifest.json",
-            Manifest(
+        defaults = {
+            "manifest.json": Manifest(
                 created_at=timestamp,
                 updated_at=timestamp,
                 integrity={
@@ -63,23 +62,47 @@ class HandoffStore:
                     "canonical_layout_fingerprint": self._layout_fingerprint(),
                 },
             ).to_dict(),
-        )
-        self._write_json(
-            "session/current.json",
-            SessionState(timestamp=timestamp).to_dict(),
-        )
-        self._write_json("tasks/tasks.json", {"tasks": []})
-        self._write_json("plans/plan-index.json", {"active": None, "plans": []})
-        self._write_json("memory/project-memory.json", {"entries": []})
-        self._write_json("context/files-read.json", {"files": []})
-        self._write_json("context/files-touched.json", {"files": []})
-        self._write_json("context/constraints.json", {"sources": [], "rules": []})
-        self._write_json("context/instruction-aliases.json", {"aliases": []})
-        self._write_json("verification/checks.json", {"checks": []})
+            "session/current.json": SessionState(timestamp=timestamp).to_dict(),
+            "tasks/tasks.json": {"tasks": []},
+            "plans/plan-index.json": {"active": None, "plans": []},
+            "memory/project-memory.json": {"entries": []},
+            "context/files-read.json": {"files": []},
+            "context/files-touched.json": {"files": []},
+            "context/constraints.json": {"sources": [], "rules": []},
+            "context/instruction-aliases.json": {"aliases": []},
+            "verification/checks.json": {"checks": []},
+        }
+
+        for relative, payload in defaults.items():
+            path = self.base / relative
+            if not path.exists():
+                self._write_json(relative, payload)
 
         for relative in self.CANONICAL_TEXT_FILES:
             path = self.base / relative
             path.touch(exist_ok=True)
+
+    def read_json(self, relative: str, default: dict | None = None) -> dict:
+        path = self.base / relative
+        if not path.exists():
+            return {} if default is None else default
+        return json.loads(path.read_text())
+
+    def write_json(self, relative: str, payload: dict) -> Path:
+        self._write_json(relative, payload)
+        return self.base / relative
+
+    def append_jsonl(self, relative: str, entries: list[dict]) -> Path:
+        path = self.base / relative
+        if not entries:
+            return path
+        with path.open("a", encoding="utf-8") as handle:
+            for entry in entries:
+                handle.write(json.dumps(entry, sort_keys=True) + "\n")
+        return path
+
+    def timestamp(self) -> str:
+        return self._timestamp()
 
     def _write_json(self, relative: str, payload: dict) -> None:
         path = self.base / relative

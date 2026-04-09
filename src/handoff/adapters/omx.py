@@ -12,12 +12,20 @@ class OMXAdapter:
         self.root = root
 
     def available(self) -> bool:
-        return (self.root / "notepad.md").exists()
+        return any(
+            (
+                (self.root / "notepad.md").exists(),
+                (self.root / "plans").is_dir(),
+                (self.root / "state" / "session.json").exists(),
+                (self.root / "project-memory.json").exists(),
+            )
+        )
 
     def capture(self) -> dict[str, Any]:
         plans_dir = self.root / "plans"
         plan_paths = sorted(plans_dir.glob("*.md")) if plans_dir.exists() else []
 
+        notes_path = self.root / "notepad.md"
         session_path = self.root / "state" / "session.json"
         session = json.loads(read_text(session_path)) if session_path.exists() else {}
 
@@ -30,7 +38,7 @@ class OMXAdapter:
 
         return {
             "adapter": self.name,
-            "notes": read_text(self.root / "notepad.md"),
+            "notes": read_text(notes_path) if notes_path.exists() else "",
             "plans": [read_text(path) for path in plan_paths],
             "session": session,
             "project_memory": project_memory,

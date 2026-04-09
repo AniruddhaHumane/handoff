@@ -38,6 +38,23 @@ class MemoryMergeTest(unittest.TestCase):
         self.assertIn("omx", merged["entries"][0]["sources"])
         self.assertGreaterEqual(len(log), 1)
 
+    def test_resume_path_keeps_single_memory_entry_after_merge(self) -> None:
+        current = {
+            "entries": [
+                {"key": "a", "value": "x", "sources": ["local"], "updated_at": "1"}
+            ]
+        }
+        incoming = {
+            "entries": [
+                {"key": "a", "value": "x", "sources": ["omx"], "updated_at": "2"}
+            ]
+        }
+
+        merged, _ = merge_project_memory(current, incoming)
+
+        self.assertEqual(len(merged["entries"]), 1)
+        self.assertIn("omx", merged["entries"][0]["sources"])
+
 
 if __name__ == "__main__":
     unittest.main()
