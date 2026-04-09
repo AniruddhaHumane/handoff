@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+from handoff.checkpoint import run_checkpoint, run_resume
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="handoff")
@@ -17,8 +19,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    parser.parse_args(argv)
-    return 0
+    args = parser.parse_args(argv)
+    if args.command == "checkpoint":
+        run_checkpoint(args.root)
+        print(args.root / ".handoff" / "restore.md")
+        return 0
+    if args.command == "resume":
+        print(run_resume(args.root))
+        return 0
+    return 1
 
 
 if __name__ == "__main__":

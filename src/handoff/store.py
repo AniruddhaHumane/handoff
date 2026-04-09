@@ -85,6 +85,17 @@ class HandoffStore:
         path = self.base / relative
         path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
+    def write_restore(self, restore: str) -> Path:
+        path = self.base / "restore.md"
+        path.write_text(restore)
+        return path
+
+    def read_restore(self) -> str:
+        path = self.base / "restore.md"
+        if not path.exists():
+            raise FileNotFoundError("restore.md not found")
+        return path.read_text()
+
     def _layout_fingerprint(self) -> str:
         entries = sorted(self.CANONICAL_DIRECTORIES + self.CANONICAL_JSON_FILES + self.CANONICAL_TEXT_FILES)
         digest = hashlib.sha256()
