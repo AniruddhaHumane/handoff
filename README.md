@@ -1,67 +1,57 @@
 # portable-handoff
 
-Portable handoff state for cross-agent resume.
+Portable agent-centric handoff state for cross-agent resume.
 
-## Commands
+## Main Commands
 
-```bash
-PYTHONPATH=src python -m handoff.cli checkpoint --root /path/to/repo
-PYTHONPATH=src python -m handoff.cli resume --root /path/to/repo
-PYTHONPATH=src python -m handoff.cli export --root /path/to/repo
+- `/handoff [agent?]`
+- `/get-handoff A,B`
+
+The product surface is skill-first. There is no end-user CLI.
+
+## Purpose
+
+Use `/handoff` to save the current live agent state under a named agent snapshot, then use `/get-handoff A,B` in a new agent session to merge one or more prior agent snapshots into a resumable context.
+
+## Storage
+
+```text
+.handoff/
+  agents/
+    A/
+      snapshot.json
+      summary.md
+  imports/
+    current-get-handoff.json
+    current-get-handoff.md
+  shared/
+    constraints.json
+    project-memory.json
 ```
 
-## Self Test
+## Recommended Flow
 
-```bash
-chmod +x scripts/self-test.sh
-./scripts/self-test.sh
+Source agent:
+
+```text
+/handoff
 ```
 
-## Generic Handoff Workflow
+or:
 
-Preferred path:
-
-1. While still in the source model session, use the `$handoff` live capture skill when available.
-2. Then run:
-
-```bash
-PYTHONPATH=src python -m handoff.cli export --root /path/to/repo
+```text
+/handoff A
 ```
 
-This writes `.handoff/llm-handoff.md` and prints the same structured handoff block to stdout.
+Receiving agent:
 
-If the current `.handoff` state is already rich enough, export prints immediately.
-
-If the state is too sparse, it interactively prompts for:
-
-- summary
-- next action
-- optional open tasks
-- optional key decisions
-
-and saves that data into `.handoff/session/current.json` before regenerating the export.
-
-Current guarantees:
-
-- `portable-handoff` persists durable context into `.handoff/`
-- it can optionally import `.omx/` state during refresh
-- it can generate a generic structured LLM-readable handoff block
-- it does **not** automatically inject context into another model runtime
-- it does **not** transfer hidden model state, only externalized project state
-
-## Compatibility Wrapper
-
-The existing wrapper is still available for compatibility while the product surface migrates:
-
-```bash
-chmod +x scripts/handoff-to-claude.sh
-./scripts/handoff-to-claude.sh /path/to/repo
+```text
+/get-handoff A,B
 ```
-
-It now delegates to the same generic export path.
 
 ## Behavior
 
-- `.handoff/` is canonical
-- OMX state is imported only when available
-- hidden model state is not portable
+- `.handoff/agents/<agent>/` is the source of truth for per-agent snapshots
+- `/get-handoff` merges named agent snapshots using newest-wins primary state
+- older snapshots remain as supporting context
+- hidden model state is not portable; only externalized state transfers

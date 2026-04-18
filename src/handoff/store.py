@@ -3,47 +3,18 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from handoff.models import Manifest, SessionState
-
-
 class HandoffStore:
     CANONICAL_DIRECTORIES = (
-        "session",
-        "tasks",
-        "plans",
-        "memory",
-        "context",
-        "verification",
-        "artifacts",
-        "artifacts/exports",
-        "artifacts/imports",
+        "agents",
+        "imports",
+        "shared",
     )
 
     CANONICAL_JSON_FILES = (
-        "manifest.json",
-        "session/current.json",
-        "tasks/tasks.json",
-        "plans/plan-index.json",
-        "memory/project-memory.json",
-        "context/files-read.json",
-        "context/files-touched.json",
-        "context/constraints.json",
-        "context/instruction-aliases.json",
-        "verification/checks.json",
+        "shared/constraints.json",
+        "shared/project-memory.json",
     )
-
-    CANONICAL_TEXT_FILES = (
-        "restore.md",
-        "llm-handoff.md",
-        "session/recent-summary.md",
-        "session/conversation-tail.md",
-        "session/next-action.md",
-        "session/status.md",
-        "session/capture-history.jsonl",
-        "plans/active-plan.md",
-        "verification/verification.md",
-        "memory/memory-merge-log.jsonl",
-    )
+    CANONICAL_TEXT_FILES: tuple[str, ...] = ()
 
     def __init__(self, root: Path) -> None:
         self.root = root
@@ -56,23 +27,8 @@ class HandoffStore:
             (self.base / relative).mkdir(parents=True, exist_ok=True)
 
         defaults = {
-            "manifest.json": Manifest(
-                created_at=timestamp,
-                updated_at=timestamp,
-                integrity={
-                    "algorithm": "sha256",
-                    "canonical_layout_fingerprint": self._layout_fingerprint(),
-                },
-            ).to_dict(),
-            "session/current.json": SessionState(timestamp=timestamp).to_dict(),
-            "tasks/tasks.json": {"tasks": []},
-            "plans/plan-index.json": {"active": None, "plans": []},
-            "memory/project-memory.json": {"entries": []},
-            "context/files-read.json": {"files": []},
-            "context/files-touched.json": {"files": []},
-            "context/constraints.json": {"sources": [], "rules": []},
-            "context/instruction-aliases.json": {"aliases": []},
-            "verification/checks.json": {"checks": []},
+            "shared/constraints.json": {"sources": [], "rules": []},
+            "shared/project-memory.json": {"entries": []},
         }
 
         for relative, payload in defaults.items():
@@ -98,6 +54,7 @@ class HandoffStore:
         path = self.base / relative
         if not entries:
             return path
+        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as handle:
             for entry in entries:
                 handle.write(json.dumps(entry, sort_keys=True) + "\n")
@@ -111,32 +68,39 @@ class HandoffStore:
 
     def _write_json(self, relative: str, payload: dict) -> None:
         path = self.base / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
-    def write_restore(self, restore: str) -> Path:
-        path = self.base / "restore.md"
-        path.write_text(restore)
+    def write_agent_snapshot(self, agent: str, payload: dict) -> Path:
+        path = self.base / "agents" / agent / "snapshot.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
         return path
 
-    def write_llm_handoff(self, content: str) -> Path:
-        path = self.base / "llm-handoff.md"
+    def read_agent_snapshot(self, agent: str) -> dict:
+        path = self.base / "agents" / agent / "snapshot.json"
+        if not path.exists():
+            raise FileNotFoundError(f"snapshot.json not found for agent {agent}")
+        return json.loads(path.read_text())
+
+    def write_agent_summary(self, agent: str, content: str) -> Path:
+        path = self.base / "agents" / agent / "summary.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         return path
 
-    def read_restore(self) -> str:
-        path = self.base / "restore.md"
-        if not path.exists():
-            raise FileNotFoundError("restore.md not found")
-        return path.read_text()
-
-    def read_llm_handoff(self) -> str:
-        path = self.base / "llm-handoff.md"
-        if not path.exists():
-            raise FileNotFoundError("llm-handoff.md not found")
-        return path.read_text()
+    def write_import_artifacts(self, payload: dict, content: str) -> None:
+        self._write_json("imports/current-get-handoff.json", payload)
+        path = self.base / "imports" / "current-get-handoff.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
 
     def _layout_fingerprint(self) -> str:
-        entries = sorted(self.CANONICAL_DIRECTORIES + self.CANONICAL_JSON_FILES + self.CANONICAL_TEXT_FILES)
+        entries = sorted(
+            self.CANONICAL_DIRECTORIES
+            + self.CANONICAL_JSON_FILES
+            + self.CANONICAL_TEXT_FILES
+        )
         digest = hashlib.sha256()
         digest.update("\n".join(entries).encode("utf-8"))
         return digest.hexdigest()
