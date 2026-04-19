@@ -11,31 +11,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: LintExpected
+  validate:
+    name: Validate skills and installer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Check shell syntax
+        run: bash -n install.sh
 
-      - name: Compile Python sources
-        run: python -m compileall src tests
+      - name: Check skill files
+        run: |
+          test -f skills/handoff/SKILL.md
+          test -f skills/get-handoff/SKILL.md
+          grep -q 'name: handoff' skills/handoff/SKILL.md
+          grep -q 'name: get-handoff' skills/get-handoff/SKILL.md
 
-  test:
-    name: TestsExpected
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
+      - name: Smoke test copy install
+        run: |
+          tmp="$(mktemp -d)"
+          ./install.sh both --home "$tmp" --mode copy
+          test -f "$tmp/.codex/skills/handoff/SKILL.md"
+          test -f "$tmp/.codex/skills/get-handoff/SKILL.md"
+          test -f "$tmp/.claude/skills/handoff/SKILL.md"
+          test -f "$tmp/.claude/skills/get-handoff/SKILL.md"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run tests
-        run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Smoke test symlink install
+        run: |
+          tmp="$(mktemp -d)"
+          ./install.sh codex --home "$tmp" --mode symlink
+          test -L "$tmp/.codex/skills/handoff"
+          test -L "$tmp/.codex/skills/get-handoff"

@@ -1,65 +1,47 @@
 # portable-handoff
 
-Portable agent-centric handoff state for cross-agent resume.
+Portable agent handoff skills for Codex and Claude.
 
-## Main Commands
+## What This Installs
 
 - `/handoff [agent?]`
 - `/get-handoff A,B`
 
-The handoff product surface is skill-first. The only CLI is `handoff-install`, which installs the skills.
+The skills store portable context under `.handoff/` so one agent session can
+save a concise state snapshot and another agent can resume from it.
 
-## Install Skills
+## Install
 
-From a local checkout, install into Codex with symlinks:
-
-```bash
-PYTHONPATH=src python -m handoff.install codex
-```
-
-Install into Claude with symlinks:
+Install into Codex:
 
 ```bash
-PYTHONPATH=src python -m handoff.install claude
+./install.sh codex
 ```
 
-After package or marketplace installation, the equivalent command is:
+Install into Claude:
 
 ```bash
-handoff-install codex
-handoff-install claude
+./install.sh claude
 ```
 
-Use copies instead of symlinks when you do not want the installed skills to track this checkout:
+Install into both runtimes:
 
 ```bash
-handoff-install codex --mode copy
-handoff-install claude --mode copy
+./install.sh both
 ```
 
-Restart Codex or Claude after installing so the runtime reloads available skills.
+By default, the installer symlinks this checkout's skill directories so local
+edits are reflected immediately. Use copies instead when you want installed
+skills to remain fixed:
 
-## Purpose
-
-Use `/handoff` to save the current live agent state under a named agent snapshot, then use `/get-handoff A,B` in a new agent session to merge one or more prior agent snapshots into a resumable context.
-
-## Storage
-
-```text
-.handoff/
-  agents/
-    A/
-      snapshot.json
-      summary.md
-  imports/
-    current-get-handoff.json
-    current-get-handoff.md
-  shared/
-    constraints.json
-    project-memory.json
+```bash
+./install.sh both --mode copy
 ```
 
-## Recommended Flow
+Restart Codex or Claude after installing so the runtime reloads available
+skills.
+
+## Usage
 
 Source agent:
 
@@ -79,9 +61,32 @@ Receiving agent:
 /get-handoff A,B
 ```
 
-## Behavior
+## Storage
 
-- `.handoff/agents/<agent>/` is the source of truth for per-agent snapshots
-- `/get-handoff` merges named agent snapshots using newest-wins primary state
-- older snapshots remain as supporting context
-- hidden model state is not portable; only externalized state transfers
+```text
+.handoff/
+  agents/
+    A/
+      snapshot.json
+      summary.md
+  imports/
+    current-get-handoff.json
+    current-get-handoff.md
+  shared/
+    constraints.json
+    project-memory.json
+```
+
+## Repository Layout
+
+```text
+install.sh
+skills/
+  handoff/
+    SKILL.md
+  get-handoff/
+    SKILL.md
+```
+
+The previous Python package and internal planning docs are preserved on the
+`python-package-docs` branch.
