@@ -15,7 +15,7 @@ jobs:
     name: Validate skills and installer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check shell syntax
         run: bash -n install.sh
