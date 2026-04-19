@@ -1,119 +1,33 @@
-# ── Python ──────────────────────────────────────────────
+# Local runtime state
+.handoff/
+.omx/
+.omc/
+.codex
+.codex/
+.claude
+.claude/
+
+# Build and cache output
+build/
+dist/
+.venv/
+*.egg-info/
+.pytest_cache/
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-*.pyo
 
-# Virtual environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-.python-version
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-
-# ── ML / Data ────────────────────────────────────────────
-*.h5
-*.hdf5
-*.pkl
-*.pickle
-*.pt
-*.pth
-*.onnx
-*.pb
-*.ckpt
-*.safetensors
-data/raw/
-data/processed/
-models/
-checkpoints/
-runs/
-wandb/
-mlruns/
-.neptune/
-lightning_logs/
-
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
-
-# ── Node / JS ────────────────────────────────────────────
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.yarn/cache
-.yarn/unplugged
-dist/
-.next/
-.nuxt/
-.output/
-.cache/
-
-# ── Editors ──────────────────────────────────────────────
+# Editors and OS files
 .idea/
 .vscode/
 *.swp
 *.swo
-*.sublime-project
-*.sublime-workspace
 .DS_Store
 Thumbs.db
 
-# ── Secrets / Credentials ────────────────────────────────
+# Secrets
 .env
 .env.*
 !.env.example
 *.pem
 *.key
-*.p12
-*.pfx
 secrets/
-
-# ── OS ───────────────────────────────────────────────────
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# ── Infra / IaC ──────────────────────────────────────────
-.terraform/
-*.tfstate
-*.tfstate.*
-.terraformrc
-terraform.rc
-.omx/
-
-# ── Local agent / handoff helpers ────────────────────────
-.codex
-.claude/

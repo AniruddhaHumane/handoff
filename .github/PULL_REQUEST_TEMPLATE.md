@@ -1,29 +1,29 @@
 ## What does this PR do?
 
-<!-- Brief description of the change and why it's needed -->
+<!-- Brief description of the skill or installer change and why it is needed. -->
 
 ## Type of change
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Refactor / cleanup
-- [ ] Docs / chore
+- [ ] Skill behavior
+- [ ] Installer
+- [ ] Documentation
+- [ ] GitHub metadata / CI
 - [ ] Breaking change
 
 ## Related issues
 
 Closes #<!-- issue number -->
 
-## Testing
+## Verification
 
-<!-- How was this tested? What should reviewers check? -->
+<!-- Include the commands you ran and what reviewers should check. -->
 
-- [ ] Unit tests added / updated
-- [ ] Manually tested
+- [ ] `bash -n install.sh`
+- [ ] `./install.sh both --home "$(mktemp -d)" --mode copy`
+- [ ] Manually reviewed installed `SKILL.md` files
 
 ## Checklist
 
-- [ ] My code follows the project's style guidelines
-- [ ] I've reviewed my own diff
-- [ ] I've added comments where the code is non-obvious
-- [ ] No new secrets or credentials committed
+- [ ] The README still matches the install flow
+- [ ] Skill files remain under `skills/<name>/SKILL.md`
+- [ ] No local `.handoff/`, `.omx/`, `.omc/`, `.codex`, or `.claude` state is committed

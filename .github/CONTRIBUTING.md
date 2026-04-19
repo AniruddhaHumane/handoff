@@ -1,36 +1,34 @@
 # Contributing
 
-Thanks for taking the time to contribute! Please follow these guidelines.
+This branch ships the handoff skills and a shell installer.
 
 ## Branching
 
-- Branch off `main` for all changes
-- Use descriptive branch names: `feat/add-auth`, `fix/null-pointer`, `chore/update-deps`
+- Branch off `master` for skill and installer changes.
+- Keep changes focused and reviewable.
 
-## Commit Messages
+## Verification
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+Before opening a pull request, run:
 
+```bash
+bash -n install.sh
+tmp="$(mktemp -d)"
+./install.sh both --home "$tmp" --mode copy
 ```
-feat: add user login endpoint
-fix: handle empty response from model
-chore: bump dependencies
-docs: update API reference
+
+Then confirm these files exist:
+
+```text
+$tmp/.codex/skills/handoff/SKILL.md
+$tmp/.codex/skills/get-handoff/SKILL.md
+$tmp/.claude/skills/handoff/SKILL.md
+$tmp/.claude/skills/get-handoff/SKILL.md
 ```
 
 ## Pull Requests
 
-- Keep PRs small and focused (one concern per PR)
-- Fill out the PR template fully
-- All CI checks must pass before requesting review
-- At least 1 approval required to merge
-
-## Code Style
-
-- Follow the `.editorconfig` settings
-- Run the linter before pushing
-- Write tests for new features
-
-## Reporting Issues
-
-Use the issue templates provided — bug reports and feature requests have separate forms.
+- Fill out the PR template.
+- Include the verification you ran.
+- Do not commit local `.handoff/`, `.omx/`, `.omc/`, or runtime install
+  directories.
