@@ -1,7 +1,12 @@
 import hashlib
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
+
+
+_AGENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+
 
 class HandoffStore:
     CANONICAL_DIRECTORIES = (
@@ -72,19 +77,19 @@ class HandoffStore:
         path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
     def write_agent_snapshot(self, agent: str, payload: dict) -> Path:
-        path = self.base / "agents" / agent / "snapshot.json"
+        path = self._agent_dir(agent) / "snapshot.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
         return path
 
     def read_agent_snapshot(self, agent: str) -> dict:
-        path = self.base / "agents" / agent / "snapshot.json"
+        path = self._agent_dir(agent) / "snapshot.json"
         if not path.exists():
             raise FileNotFoundError(f"snapshot.json not found for agent {agent}")
         return json.loads(path.read_text())
 
     def write_agent_summary(self, agent: str, content: str) -> Path:
-        path = self.base / "agents" / agent / "summary.md"
+        path = self._agent_dir(agent) / "summary.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
         return path
@@ -94,6 +99,14 @@ class HandoffStore:
         path = self.base / "imports" / "current-get-handoff.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
+
+    def _agent_dir(self, agent: str) -> Path:
+        if not _AGENT_ID_PATTERN.fullmatch(agent):
+            raise ValueError(
+                "Agent names may only contain letters, numbers, dots, underscores, "
+                "and dashes, and must start with a letter or number"
+            )
+        return self.base / "agents" / agent
 
     def _layout_fingerprint(self) -> str:
         entries = sorted(
