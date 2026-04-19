@@ -1,5 +1,7 @@
 # portable-handoff
 
+![handoff](assets/handoff.png)
+
 Keep coding-agent work portable, resumable, and tool-neutral.
 
 `portable-handoff` gives Codex and Claude two small skills:
@@ -32,16 +34,16 @@ actually inspect, trust, and continue from.
 
 Use `portable-handoff` whenever losing context would slow the next session down.
 
-| Situation | How it helps |
-| --- | --- |
+| Situation                                          | How it helps                                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Switching from Codex to Claude, or Claude to Codex | Carries the project state through `.handoff/` instead of relying on copied chat text. |
-| Hitting a context limit | Saves a compact continuation point before the current session gets too large. |
-| Running multiple agents | Lets agent `C` resume from agent `A`, agent `B`, or both. |
-| Pausing work overnight | Records what changed, what passed, what failed, and the next action. |
-| Handing work to a teammate | Gives them a file-backed summary with decisions, blockers, and relevant files. |
-| Reviewing long-running refactors | Keeps cleanup intent, touched files, and verification state visible. |
-| Debugging across tools | Preserves hypotheses and failed paths so the next agent does not repeat them. |
-| Working in constrained environments | Uses plain files and agent instructions; no service or package runtime is required. |
+| Hitting a context limit                            | Saves a compact continuation point before the current session gets too large.         |
+| Running multiple agents                            | Lets agent `C` resume from agent `A`, agent `B`, or both.                             |
+| Pausing work overnight                             | Records what changed, what passed, what failed, and the next action.                  |
+| Handing work to a teammate                         | Gives them a file-backed summary with decisions, blockers, and relevant files.        |
+| Reviewing long-running refactors                   | Keeps cleanup intent, touched files, and verification state visible.                  |
+| Debugging across tools                             | Preserves hypotheses and failed paths so the next agent does not repeat them.         |
+| Working in constrained environments                | Uses plain files and agent instructions; no service or package runtime is required.   |
 
 ## Quick Start
 
