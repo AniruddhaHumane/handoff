@@ -34,7 +34,6 @@ actually inspect, trust, and continue from.
 
 Use `portable-handoff` whenever losing context would slow the next session down.
 
-
 | Situation                                          | How it helps                                                                          |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Switching from Codex to Claude, or Claude to Codex | Carries the project state through `.handoff/` instead of relying on copied chat text. |
@@ -45,7 +44,6 @@ Use `portable-handoff` whenever losing context would slow the next session down.
 | Reviewing long-running refactors                   | Keeps cleanup intent, touched files, and verification state visible.                  |
 | Debugging across tools                             | Preserves hypotheses and failed paths so the next agent does not repeat them.         |
 | Working in constrained environments                | Uses plain files and agent instructions; no service or package runtime is required.   |
-
 
 ## Quick Start
 
@@ -193,9 +191,9 @@ the `python-package-docs` branch for future experimentation.
 - Agent-readable: the next agent can inspect every piece of transferred state.
 - Small by default: the handoff is concise enough to paste, review, or merge.
 - Honest about limits: hidden model activations are not portable; durable state
-is.
+  is.
 - Useful with one agent, stronger with many: single-session resume, multi-agent
-merge, and human review all use the same files.
+  merge, and human review all use the same files.
 
 ## Frequently Asked Questions
 
