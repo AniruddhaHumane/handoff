@@ -1,10 +1,10 @@
-# portable-handoff
+# Agent Handoff
 
 ![handoff](assets/handoff.png)
 
-Keep coding-agent work portable, resumable, and tool-neutral.
+Portable, file-backed handoffs for Codex, Claude, and other coding agents.
 
-`portable-handoff` gives Codex and Claude two small skills:
+Agent Handoff gives Codex and Claude two small skills:
 
 - `/handoff [agent?]` captures the current agent session into a durable snapshot.
 - `/get-handoff A,B` merges one or more snapshots into a compact resume brief.
@@ -17,7 +17,7 @@ sessions, parallel agents, or handoffs between people and tools.
 Coding agents are powerful while they remember the work. They are fragile when
 that memory lives only inside one chat window.
 
-`portable-handoff` moves the important state into files:
+Agent Handoff moves the important state into files:
 
 - what the agent was trying to do
 - what changed
@@ -32,7 +32,7 @@ actually inspect, trust, and continue from.
 
 ## When To Use It
 
-Use `portable-handoff` whenever losing context would slow the next session down.
+Use Agent Handoff whenever losing context would slow the next session down.
 
 | Situation                                          | How it helps                                                                          |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -180,7 +180,7 @@ skills/
 ```
 
 There is no Python package on `master`. The current product surface is the
-skills plus a shell installer.
+Agent Handoff skills plus a shell installer.
 
 The earlier Python package, tests, and internal planning docs are preserved on
 the `python-package-docs` branch for future experimentation.
