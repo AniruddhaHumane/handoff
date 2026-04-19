@@ -7,7 +7,37 @@ Portable agent-centric handoff state for cross-agent resume.
 - `/handoff [agent?]`
 - `/get-handoff A,B`
 
-The product surface is skill-first. There is no end-user CLI.
+The handoff product surface is skill-first. The only CLI is `handoff-install`, which installs the skills.
+
+## Install Skills
+
+From a local checkout, install into Codex with symlinks:
+
+```bash
+PYTHONPATH=src python -m handoff.install codex
+```
+
+Install into Claude with symlinks:
+
+```bash
+PYTHONPATH=src python -m handoff.install claude
+```
+
+After package or marketplace installation, the equivalent command is:
+
+```bash
+handoff-install codex
+handoff-install claude
+```
+
+Use copies instead of symlinks when you do not want the installed skills to track this checkout:
+
+```bash
+handoff-install codex --mode copy
+handoff-install claude --mode copy
+```
+
+Restart Codex or Claude after installing so the runtime reloads available skills.
 
 ## Purpose
 
